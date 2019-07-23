@@ -20,10 +20,12 @@ def clear():
     # check and make call for specific operating system
     _ = call('clear' if os.name =='posix' else 'cls')
 
-async def get_key(help_wait_count=100): 
+async def get_key(help_wait_count=100, refresh_rate=30): 
     """
     handles raw keyboard data, passes to handle_input if its interesting.
     Also, displays help tooltip if no input for a time.
+
+    refresh_rate sets the number of times per second that input is polled.
     """
     old_settings = termios.tcgetattr(sys.stdin)
     try:
@@ -32,11 +34,9 @@ async def get_key(help_wait_count=100):
         state_dict['same_count'] = 0
         old_key = None
         while True:
-            await asyncio.sleep(0.03)
+            await asyncio.sleep(1 / refresh_rate)
             if isData():
                 key = sys.stdin.read(1)
-                if key == '\x7f':  # x1b is ESC
-                    state_dict['exiting'] = True
                 if key is not None:
                     await handle_input(key)
     finally: 
